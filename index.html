@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard NR10</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial, sans-serif; margin: 30px; }
+h1 { text-align: center; }
+
+.painel {
+    display:flex;
+    justify-content:space-around;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.card {
+    padding:15px;
+    border-radius:8px;
+    width:200px;
+    text-align:center;
+    color:white;
+    margin:5px;
+}
+
+.total{background:#1f4e79;}
+.vigente{background:#198754;}
+.alerta{background:#ffc107; color:black;}
+.vencido{background:#dc3545;}
+
+button {
+    margin:5px;
+    padding:8px 15px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+table {
+    border-collapse:collapse;
+    width:100%;
+    margin-top:15px;
+}
+
+th, td {
+    border:1px solid #ccc;
+    padding:6px;
+    text-align:center;
+}
+
+thead { background:#1f4e79; color:white; }
+
+.vigente-row{background:#d4edda;}
+.alerta-row{background:#fff3cd;}
+.vencido-row{background:#f8d7da;}
+
+canvas{
+    max-width:400px;
+    margin:20px auto;
+    display:block;
+}
+</style>
+</head>
+<body>
+
+<h1>Painel de Gestão NR10</h1>
+
+<div class="painel">
+<div class="card total" id="total">Total: 0</div>
+<div class="card vigente" id="vigentes">Vigentes: 0</div>
+<div class="card alerta" id="alertas">Alerta: 0</div>
+<div class="card vencido" id="vencidos">Vencidos: 0</div>
+</div>
+
+<div style="text-align:center;">
+<button onclick="filtrar('todos')">Todos</button>
+<button onclick="filtrar('vigente-row')">Vigentes</button>
+<button onclick="filtrar('alerta-row')">Alerta</button>
+<button onclick="filtrar('vencido-row')">Vencidos</button>
+</div>
+
+<canvas id="grafico"></canvas>
+
+<table id="tabela">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Básico Reciclagem</th>
+<th>SEP Reciclagem</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SANDRO MORETTI DE PAULA</td>
+<td class="basico">27/09/2023</td>
+<td class="sep">09/10/2023</td>
+<td class="status"></td>
+</tr>
+</tbody>
+</table>
+
+<script>
+function calcular(dataTexto){
+    const hoje=new Date();
+    const p=dataTexto.split("/");
+    const d=new Date(p[2],p[1]-1,p[0]);
+    d.setFullYear(d.getFullYear()+2);
+    return Math.ceil((d-hoje)/(1000*60*60*24));
+}
+
+let contV=0, contA=0, contX=0;
+
+document.querySelectorAll("#tabela tbody tr").forEach(linha=>{
+    let statusFinal="vigente-row";
+    let diasB=calcular(linha.querySelector(".basico").innerText);
+    let diasS=calcular(linha.querySelector(".sep").innerText);
+
+    [diasB,diasS].forEach(dias=>{
+        if(dias<0) statusFinal="vencido-row";
+        else if(dias<=60 && statusFinal!=="vencido-row") statusFinal="alerta-row";
+    });
+
+    linha.classList.add(statusFinal);
+    linha.querySelector(".status").innerText=statusFinal.replace("-row","").toUpperCase();
+
+    if(statusFinal==="vigente-row") contV++;
+    if(statusFinal==="alerta-row") contA++;
+    if(statusFinal==="vencido-row") contX++;
+});
+
+let total=contV+contA+contX;
+
+document.getElementById("total").innerText="Total: "+total;
+document.getElementById("vigentes").innerText="Vigentes: "+contV;
+document.getElementById("alertas").innerText="Alerta: "+contA;
+document.getElementById("vencidos").innerText="Vencidos: "+contX;
+
+function filtrar(tipo){
+document.querySelectorAll("#tabela tbody tr").forEach(linha=>{
+if(tipo==="todos") linha.style.display="";
+else linha.style.display=linha.classList.contains(tipo)?"":"none";
+});
+}
+
+new Chart(document.getElementById("grafico"),{
+type:"doughnut",
+data:{
+labels:["Vigentes","Alerta","Vencidos"],
+datasets:[{data:[contV,contA,contX]}]
+}
+});
+</script>
+
+</body>
+</html>
