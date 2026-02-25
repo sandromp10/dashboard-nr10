@@ -156,30 +156,70 @@ async function importarPlanilha() {
             cabecalho.appendChild(th);
         });
 
-        // Criar linhas de dados
-        linhas.slice(1).forEach(linha => {
-            const tr = document.createElement("tr");
+       <script>
 
-            linha.forEach(celula => {
-                const td = document.createElement("td");
-                td.textContent = celula || "";
-                tr.appendChild(td);
-            });
+function converterDataExcel(valor){
 
-            corpo.appendChild(tr);
+    // Se for número (data serial do Excel)
+    if(typeof valor === "number"){
+        const data = new Date((valor - 25569) * 86400 * 1000);
+        const dia = String(data.getDate()).padStart(2,'0');
+        const mes = String(data.getMonth()+1).padStart(2,'0');
+        const ano = data.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    // Se já estiver texto, retorna normal
+    return valor || "";
+}
+
+async function carregarDashboard(){
+
+    const response = await fetch("dados_nr10.xlsx");
+    const data = await response.arrayBuffer();
+
+    const workbook = XLSX.read(data,{type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(sheet,{header:1});
+
+    const colunas = [0,3,5,8,9,15,16];
+    const corpo = document.getElementById("corpo");
+    corpo.innerHTML = "";
+
+    let total = 0;
+
+    linhas.slice(1).forEach(linha=>{
+
+        if(!linha.length) return;
+
+        const tr = document.createElement("tr");
+
+        colunas.forEach(indice=>{
+
+            const td = document.createElement("td");
+            let valor = linha[indice];
+
+            // Converte datas automaticamente
+            td.textContent = converterDataExcel(valor);
+
+            tr.appendChild(td);
         });
 
-        console.log("Importação concluída com sucesso.");
+        corpo.appendChild(tr);
+        total++;
+    });
 
-    } catch (erro) {
-        console.error("Erro ao importar planilha:", erro);
-        alert("Erro ao importar planilha. Verifique o console.");
-    }
+    document.getElementById("total").textContent = total;
 }
+
+carregarDashboard();
+
+</script>
 
 // Executa ao carregar página
 importarPlanilha();
 
 </script>
+
 
 
