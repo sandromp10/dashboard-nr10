@@ -1,296 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Dashboard NR10</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<button onclick="exportarExcel()">Exportar Dados</button>
-    <script>
-let dadosPlanilha = [];
+<!-- Biblioteca XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-fetch("dados_nr10.xlsx")
-  .then(response => response.arrayBuffer())
-  .then(data => {
-
-    const workbook = XLSX.read(data, { type: "array" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    
-   const todasLinhas = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-const colunas = [0,3,5,8,9,15,16];
-
-dadosPlanilha = todasLinhas.map(linha =>
-  colunas.map(indice => linha[indice] || "")
-);
-
-function exportarExcel() {
-
-  if (!dadosPlanilha.length) {
-    alert("Planilha ainda não carregada.");
-    return;
-  }
-
-  const novaPlanilha = XLSX.utils.aoa_to_sheet(dadosPlanilha);
-  const novoWorkbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(novoWorkbook, novaPlanilha, "Exportado");
-
-  XLSX.writeFile(novoWorkbook, "exportacao_nr10.xlsx");
-}
-</script>
-
-<style>
-body { font-family: Arial, sans-serif; margin: 30px; }
-h1 { text-align: center; }
-
-.painel {
-    display:flex;
-    justify-content:space-around;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
-
-.card {
-    padding:15px;
-    border-radius:8px;
-    width:200px;
-    text-align:center;
-    color:white;
-    margin:5px;
-}
-
-.total{background:#1f4e79;}
-.vigente{background:#198754;}
-.alerta{background:#ffc107; color:black;}
-.vencido{background:#dc3545;}
-
-button {
-    margin:5px;
-    padding:8px 15px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-table {
-    border-collapse:collapse;
-    width:100%;
-    margin-top:15px;
-}
-
-th, td {
-    border:1px solid #ccc;
-    padding:6px;
-    text-align:center;
-}
-
-thead { background:#1f4e79; color:white; }
-
-.vigente-row{background:#d4edda;}
-.alerta-row{background:#fff3cd;}
-.vencido-row{background:#f8d7da;}
-
-canvas{
-    max-width:400px;
-    margin:20px auto;
-    display:block;
-}
-</style>
-</head>
-<body>
-
-<h1>Painel de Gestão NR10</h1>
-
-<div class="painel">
-<div class="card total" id="total">Total: 0</div>
-<div class="card vigente" id="vigentes">Vigentes: 0</div>
-<div class="card alerta" id="alertas">Alerta: 0</div>
-<div class="card vencido" id="vencidos">Vencidos: 0</div>
-</div>
-
-<div style="text-align:center;">
-<button onclick="filtrar('todos')">Todos</button>
-<button onclick="filtrar('vigente-row')">Vigentes</button>
-<button onclick="filtrar('alerta-row')">Alerta</button>
-<button onclick="filtrar('vencido-row')">Vencidos</button>
-</div>
-
-<canvas id="grafico"></canvas>
-
-<table id="tabela">
-<thead>
-<tr>
-<th>Nome</th>
-<th>Básico Reciclagem</th>
-<th>SEP Reciclagem</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SANDRO MORETTI DE PAULA</td>
-<td class="basico">27/09/2023</td>
-<td class="sep">09/10/2023</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>JOSE DE ARIMATEA NUNES JUNIOR</td>
-<td class="basico">26/07/2023</td>
-<td class="sep">05/09/2023</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>LEONARDO ROMERO DE MOURA FERNANDES</td>
-<td class="basico">19/12/2023</td>
-<td class="sep">29/06/2023</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>RODRIGO ANTONIO DE OLIVEIRA</td>
-<td class="basico">01/03/2026</td>
-<td class="sep">16/03/2026</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>DANIEL LUCAS DA SILVA JUNIOR</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-<tr>
-<td>XXXXXXXXXXXXXXXXXX</td>
-<td class="basico">25/02/2024</td>
-<td class="sep">25/02/2024</td>
-<td class="status"></td>
-</tr>
-</tbody>
-</table>
+<button id="btnExportar">Exportar Colunas Selecionadas</button>
 
 <script>
-function calcular(dataTexto){
-    const hoje=new Date();
-    const p=dataTexto.split("/");
-    const d=new Date(p[2],p[1]-1,p[0]);
-    d.setFullYear(d.getFullYear()+2);
-    return Math.ceil((d-hoje)/(1000*60*60*24));
-}
 
-let contV=0, contA=0, contX=0;
-
-document.querySelectorAll("#tabela tbody tr").forEach(linha=>{
-    let statusFinal="vigente-row";
-    let diasB=calcular(linha.querySelector(".basico").innerText);
-    let diasS=calcular(linha.querySelector(".sep").innerText);
-
-    [diasB,diasS].forEach(dias=>{
-        if(dias<0) statusFinal="vencido-row";
-        else if(dias<=60 && statusFinal!=="vencido-row") statusFinal="alerta-row";
-    });
-
-    linha.classList.add(statusFinal);
-    linha.querySelector(".status").innerText=statusFinal.replace("-row","").toUpperCase();
-
-    if(statusFinal==="vigente-row") contV++;
-    if(statusFinal==="alerta-row") contA++;
-    if(statusFinal==="vencido-row") contX++;
-});
-
-let total=contV+contA+contX;
-
-document.getElementById("total").innerText="Total: "+total;
-document.getElementById("vigentes").innerText="Vigentes: "+contV;
-document.getElementById("alertas").innerText="Alerta: "+contA;
-document.getElementById("vencidos").innerText="Vencidos: "+contX;
-
-function filtrar(tipo){
-document.querySelectorAll("#tabela tbody tr").forEach(linha=>{
-if(tipo==="todos") linha.style.display="";
-else linha.style.display=linha.classList.contains(tipo)?"":"none";
-});
-}
-
-new Chart(document.getElementById("grafico"),{
-type:"doughnut",
-data:{
-labels:["Vigentes","Alerta","Vencidos"],
-datasets:[{data:[contV,contA,contX]}]
-}
-});
-</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<button id="btnExportar">Exportar Dados</button>
-
-<script>
-let dadosPlanilha = [];
-
-async function carregarPlanilha() {
+async function exportarColunasSelecionadas() {
     try {
         const response = await fetch("dados_nr10.xlsx");
         const data = await response.arrayBuffer();
 
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        dadosPlanilha = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        
+        // Lê todas as linhas como array bruto
+        const linhas = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        console.log("Planilha carregada com sucesso.");
+        // Índices das colunas desejadas
+        const colunas = [0, 3, 5, 8, 9, 15, 16]; 
+        // A=0, D=3, F=5, I=8, J=9, P=15, Q=16
+
+        // Filtra apenas essas colunas
+        const dadosFiltrados = linhas.map(linha =>
+            colunas.map(indice => linha[indice] || "")
+        );
+
+        // Cria nova planilha
+        const novaSheet = XLSX.utils.aoa_to_sheet(dadosFiltrados);
+        const novoWorkbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(novoWorkbook, novaSheet, "Exportado");
+
+        // Faz download
+        XLSX.writeFile(novoWorkbook, "exportacao_filtrada_nr10.xlsx");
+
     } catch (erro) {
-        console.error("Erro ao carregar planilha:", erro);
+        console.error("Erro na exportação:", erro);
+        alert("Erro ao exportar. Verifique o console.");
     }
 }
 
-function exportarExcel() {
+// Evento do botão
+document.getElementById("btnExportar")
+        .addEventListener("click", exportarColunasSelecionadas);
 
-    if (!dadosPlanilha.length) {
-        alert("Planilha ainda não carregada.");
-        return;
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(dadosPlanilha);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Exportado");
-
-    XLSX.writeFile(wb, "exportacao_nr10.xlsx");
-}
-
-document.getElementById("btnExportar").addEventListener("click", exportarExcel);
-
-carregarPlanilha();
 </script>
-
-</body>
-
-</html>
-
-
-
-
