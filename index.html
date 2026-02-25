@@ -1,3 +1,126 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.card p {
+    font-size: 22px;
+    margin: 5px 0 0;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+}
+
+th {
+    background: #1f4e79;
+    color: white;
+}
+</style>
+
+<h1>Dashboard NR10</h1>
+
+<div class="dashboard">
+    <div class="card">
+        <h3>Total Registros</h3>
+        <p id="totalRegistros">0</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>A</th>
+            <th>D</th>
+            <th>F</th>
+            <th>I</th>
+            <th>J</th>
+            <th>P</th>
+            <th>Q</th>
+        </tr>
+    </thead>
+    <tbody id="corpoTabela"></tbody>
+</table>
+
+<script>
+
+async function carregarDashboard() {
+
+    const response = await fetch("dados_nr10.xlsx");
+    const data = await response.arrayBuffer();
+
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    const colunas = [0, 3, 5, 8, 9, 15, 16];
+
+    const corpo = document.getElementById("corpoTabela");
+    corpo.innerHTML = "";
+
+    let total = 0;
+
+    linhas.slice(1).forEach(linha => {
+
+        if (!linha.length) return;
+
+        const tr = document.createElement("tr");
+
+        colunas.forEach(indice => {
+            const td = document.createElement("td");
+            td.textContent = linha[indice] || "";
+            tr.appendChild(td);
+        });
+
+        corpo.appendChild(tr);
+        total++;
+    });
+
+    document.getElementById("totalRegistros").textContent = total;
+}
+
+carregarDashboard();
+
+</script>
+
 <!-- Biblioteca para ler Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -66,3 +189,4 @@ async function importarPlanilha() {
 importarPlanilha();
 
 </script>
+
