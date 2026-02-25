@@ -15,9 +15,13 @@ fetch("dados_nr10.xlsx")
     const workbook = XLSX.read(data, { type: "array" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     
-    dadosPlanilha = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+   const todasLinhas = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-  });
+const colunas = [0,3,5,8,9,15,16];
+
+dadosPlanilha = todasLinhas.map(linha =>
+  colunas.map(indice => linha[indice] || "")
+);
 
 function exportarExcel() {
 
@@ -246,5 +250,6 @@ datasets:[{data:[contV,contA,contX]}]
 </body>
 
 </html>
+
 
 
