@@ -80,11 +80,15 @@ async function carregarDashboard(){
 
     const workbook = XLSX.read(data,{type:"array"});
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const linhas = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-    // Colunas desejadas
+    // IMPORTANTE: cellDates + raw:false
+    const linhas = XLSX.utils.sheet_to_json(sheet,{
+        header:1,
+        raw:false,
+        cellDates:true
+    });
+
     const colunas = [0,3,5,8,9,15,16];
-
     const corpo = document.getElementById("corpo");
     corpo.innerHTML = "";
 
@@ -97,14 +101,15 @@ async function carregarDashboard(){
         const tr = document.createElement("tr");
 
         colunas.forEach(indice=>{
+
             const td = document.createElement("td");
             td.textContent = linha[indice] || "";
+
             tr.appendChild(td);
         });
 
         corpo.appendChild(tr);
         total++;
-
     });
 
     document.getElementById("total").textContent = total;
@@ -113,6 +118,7 @@ async function carregarDashboard(){
 carregarDashboard();
 
 </script>
+
 <!-- Biblioteca para ler Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -216,6 +222,7 @@ carregarDashboard();
 importarPlanilha();
 
 </script>
+
 
 
 
