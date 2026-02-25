@@ -216,12 +216,91 @@ async function carregarDashboard(){
     document.getElementById("total").textContent = total;
 }
 
+function verificarStatus(dataTexto){
+
+    if(!dataTexto) return "vigente";
+
+    const partes = dataTexto.split("/");
+    if(partes.length !== 3) return "vigente";
+
+    const dataCurso = new Date(partes[2], partes[1]-1, partes[0]);
+    dataCurso.setFullYear(dataCurso.getFullYear()+2);
+
+    const hoje = new Date();
+    const diffDias = Math.ceil((dataCurso - hoje)/(1000*60*60*24));
+
+    if(diffDias < 0) return "vencido";
+    if(diffDias <= 60) return "alerta";
+
+    return "vigente";
+}
+
+async function carregarDashboard(){
+
+    const response = await fetch("dados_nr10.xlsx");
+    const data = await response.arrayBuffer();
+
+    const workbook = XLSX.read(data,{type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const linhas = XLSX.utils.sheet_to_json(sheet,{
+        header:1,
+        raw:false,
+        cellDates:true
+    });
+
+    const colunas = [0,3,5,8,9,15,16];
+    const corpo = document.getElementById("corpo");
+
+    corpo.innerHTML = "";
+
+    let total = 0;
+
+    linhas.slice(1).forEach(linha=>{
+
+        if(!linha.length) return;
+
+        const tr = document.createElement("tr");
+        let statusLinha = "vigente";
+
+        colunas.forEach(indice=>{
+
+            const td = document.createElement("td");
+            let valor = linha[indice] || "";
+
+            if(indice === 8 || indice === 15){
+                const status = verificarStatus(valor);
+
+                if(status === "vencido") statusLinha = "vencido";
+                else if(status === "alerta" && statusLinha !== "vencido")
+                    statusLinha = "alerta";
+            }
+
+            td.textContent = valor;
+            tr.appendChild(td);
+        });
+
+        if(statusLinha === "vencido")
+            tr.style.backgroundColor = "#f8d7da";
+        else if(statusLinha === "alerta")
+            tr.style.backgroundColor = "#fff3cd";
+        else
+            tr.style.backgroundColor = "#d4edda";
+
+        corpo.appendChild(tr);
+        total++;
+    });
+
+    document.getElementById("total").textContent = total;
+}
+
 carregarDashboard();
 
 // Executa ao carregar página
 importarPlanilha();
 
 </script>
+
 
 
 
