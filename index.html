@@ -1,11 +1,18 @@
-<!-- Biblioteca XLSX -->
+<!-- Biblioteca para ler Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<button id="btnExportar">Exportar Colunas Selecionadas</button>
+<h2>Dados Importados da Planilha</h2>
+
+<table border="1">
+  <thead>
+    <tr id="cabecalho"></tr>
+  </thead>
+  <tbody id="corpoTabela"></tbody>
+</table>
 
 <script>
 
-async function exportarColunasSelecionadas() {
+async function importarPlanilha() {
     try {
         const response = await fetch("dados_nr10.xlsx");
         const data = await response.arrayBuffer();
@@ -13,34 +20,49 @@ async function exportarColunasSelecionadas() {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         
-        // Lê todas as linhas como array bruto
+        // Converte para array bruto
         const linhas = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        // Índices das colunas desejadas
-        const colunas = [0, 3, 5, 8, 9, 15, 16]; 
-        // A=0, D=3, F=5, I=8, J=9, P=15, Q=16
+        if (!linhas.length) {
+            alert("Planilha vazia.");
+            return;
+        }
 
-        // Filtra apenas essas colunas
-        const dadosFiltrados = linhas.map(linha =>
-            colunas.map(indice => linha[indice] || "")
-        );
+        const cabecalho = document.getElementById("cabecalho");
+        const corpo = document.getElementById("corpoTabela");
 
-        // Cria nova planilha
-        const novaSheet = XLSX.utils.aoa_to_sheet(dadosFiltrados);
-        const novoWorkbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(novoWorkbook, novaSheet, "Exportado");
+        cabecalho.innerHTML = "";
+        corpo.innerHTML = "";
 
-        // Faz download
-        XLSX.writeFile(novoWorkbook, "exportacao_filtrada_nr10.xlsx");
+        // Criar cabeçalho
+        linhas[0].forEach(coluna => {
+            const th = document.createElement("th");
+            th.textContent = coluna;
+            cabecalho.appendChild(th);
+        });
+
+        // Criar linhas de dados
+        linhas.slice(1).forEach(linha => {
+            const tr = document.createElement("tr");
+
+            linha.forEach(celula => {
+                const td = document.createElement("td");
+                td.textContent = celula || "";
+                tr.appendChild(td);
+            });
+
+            corpo.appendChild(tr);
+        });
+
+        console.log("Importação concluída com sucesso.");
 
     } catch (erro) {
-        console.error("Erro na exportação:", erro);
-        alert("Erro ao exportar. Verifique o console.");
+        console.error("Erro ao importar planilha:", erro);
+        alert("Erro ao importar planilha. Verifique o console.");
     }
 }
 
-// Evento do botão
-document.getElementById("btnExportar")
-        .addEventListener("click", exportarColunasSelecionadas);
+// Executa ao carregar página
+importarPlanilha();
 
 </script>
