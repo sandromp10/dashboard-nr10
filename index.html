@@ -246,10 +246,51 @@ datasets:[{data:[contV,contA,contX]}]
 }
 });
 </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<button id="btnExportar">Exportar Dados</button>
+
+<script>
+let dadosPlanilha = [];
+
+async function carregarPlanilha() {
+    try {
+        const response = await fetch("dados_nr10.xlsx");
+        const data = await response.arrayBuffer();
+
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        dadosPlanilha = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        console.log("Planilha carregada com sucesso.");
+    } catch (erro) {
+        console.error("Erro ao carregar planilha:", erro);
+    }
+}
+
+function exportarExcel() {
+
+    if (!dadosPlanilha.length) {
+        alert("Planilha ainda não carregada.");
+        return;
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(dadosPlanilha);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Exportado");
+
+    XLSX.writeFile(wb, "exportacao_nr10.xlsx");
+}
+
+document.getElementById("btnExportar").addEventListener("click", exportarExcel);
+
+carregarPlanilha();
+</script>
 
 </body>
 
 </html>
+
 
 
 
